@@ -1,0 +1,10 @@
+BUG 1: vectree right branch not getting loaded.  
+In one of my test cases, the node to the right of root had the value 13, but getByPath("R") returned 0 instead of 13. The Problem was that in the initializer, it was trying to copy the left tree into both the right and left tree spots. So first it would get the next location from the left tree, then try to put that location at the first spot for the right tree. But since my left tree was a singleton, it put in zero. 
+FIX: 
+I changed line 45 in vectree.cc from: 
+std::copy(start_left, start_left + to_copy, back_inserter(flatTree_));
+to:
+std::copy(start_right, start_right + to_copy, back_inserter(flatTree_));
+
+BUG? 2: vectree implements a constructor but no destructor
+
