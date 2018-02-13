@@ -107,7 +107,8 @@ PtrTree::getByPath(const std::string& path) const
 
     // recurse in that direction
     if (dir == nullptr){
-        throw std::runtime_error("Path too long!");
+        // if we can't continue on this path, return this node
+        return value_;
     } else {
         return dir->getByPath(path.substr(1,path.length()));
     }
