@@ -17,6 +17,9 @@ decompress: decompress.o huffman.o ptrtree.o
 test_huffman: test_huffman.o huffman.o ptrtree.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
 
+test_ptrtree: test_ptrtree.o ptrtree.o
+	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
+
 %.o.cc: %.cc %.hh
 	$(CXX) $(CFLAGS) -c -o $@ $<
 
