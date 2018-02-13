@@ -55,14 +55,20 @@ TEST_CASE("Correct Node is found for given Path", "[ptrtree]") {
         REQUIRE(tree3->getByPath("R") == 13);
     }
     SECTION("there are no paths coming from a tree with no leaves") {
-        REQUIRE_THROWS(tree1->getByPath("L"));
-        REQUIRE_THROWS(tree1->getByPath("R"));
+        REQUIRE(tree1->getByPath("L") == 21);
+        REQUIRE(tree1->getByPath("R") == 21);
+        REQUIRE(tree1->getByPath("LRLRL") == 21);
     }
     SECTION("No path should return the root") {
         REQUIRE(tree1->getByPath("") == 21);
     }
-    SECTION("can't go too deep") {
-        REQUIRE_THROWS(tree3->getByPath("RR"));
+    SECTION("When given a path to long, it returns the last valid node") {
+        REQUIRE(tree3->getByPath("RR") == 13);
+        REQUIRE(tree3->getByPath("RL") == 13);
+        REQUIRE(tree3->getByPath("RRRLRLLRL") == 13);
+        REQUIRE(tree3->getByPath("LL") == 21);
+        REQUIRE(tree3->getByPath("LR") == 21);
+        REQUIRE(tree3->getByPath("LR") == 21);
     }
 
     delete tree3;
@@ -114,9 +120,11 @@ TEST_CASE("unbalanced trees work", "[ptrtree]") {
     }
     SECTION("error messages are thrown on invalid input"){
         REQUIRE_THROWS(tree3->pathTo(12));
-        REQUIRE_THROWS(tree3->getByPath("L"));
-        REQUIRE_THROWS(tree3->getByPath("RR"));
-        REQUIRE_THROWS(tree2->getByPath("R"));
+    }
+    SECTION("getbypath returns last valid node in path"){
+        REQUIRE(tree3->getByPath("L") == 3);
+        REQUIRE(tree3->getByPath("RR") == 2);
+        REQUIRE(tree2->getByPath("R") == 2);
     }
     delete tree3;
     delete tree2;
