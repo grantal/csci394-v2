@@ -7,14 +7,15 @@
 #pragma once
 
 #include <string>
-#include <tuple>
+#include <utility>
 
 namespace tree {
 
 class Tree {
   public:
-    //using value_t = std::tuple<int, unsigned>;
-    using value_t = unsigned;
+    // char then frequency
+    using value_t = std::pair<unsigned, int>;
+    //using value_t = unsigned;
 
     Tree() = default; // Base class doesn't initialize anything.
     virtual ~Tree() = default;  // Destructor must always be virtual in base class.
