@@ -13,7 +13,8 @@ namespace tree {
 
 class Tree {
   public:
-    using value_t = std::tuple<int, std::string>;
+    //using value_t = std::tuple<int, unsigned>;
+    using value_t = unsigned;
 
     Tree() = default; // Base class doesn't initialize anything.
     virtual ~Tree() = default;  // Destructor must always be virtual in base class.
