@@ -20,17 +20,24 @@ PtrTree::PtrTree(value_t value, const PtrTree& left, const PtrTree& right)
 { }
 
 ///////////////////////////////////////////////////////////////////////////////
+// destroy the two leaves
+PtrTree::~PtrTree() {
+    delete left_;
+    delete right_;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Sets left_ to the given tree
 void
 PtrTree::setLeft(const PtrTree& left) {
-    left_ = std::make_shared<PtrTree>(left);
+    left_ =(PtrTree*)&left;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Sets right_ to the given tree
 void
 PtrTree::setRight(const PtrTree& right) {
-    right_ = std::make_shared<PtrTree>(right);
+    right_ =(PtrTree*)&right;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -58,8 +65,8 @@ PtrTree::pathTo(value_t value) const
     if (value == value_) {
         return "";
     }
-    const std::shared_ptr<PtrTree> branches[2] = {left_, right_};
-    const char directions[2] = {'L', 'R'};
+    const PtrTree* branches[2] = {left_, right_};
+    char directions[2] = {'L', 'R'};
     std::string path = "";
     // loop through my two branches
     for (int i = 0; i < 2; ++i){
@@ -96,7 +103,7 @@ PtrTree::getByPath(const std::string& path) const
     }
 
     // find next direction
-    std::shared_ptr<PtrTree> dir;
+    const PtrTree* dir;
     if (path[0] == 'L'){
         dir = left_;
     } else if (path[0] == 'R'){

@@ -9,7 +9,6 @@
 
 #include <ostream>
 #include <string>
-#include <memory>
 
 #include "tree.hh"
 
@@ -18,7 +17,7 @@ namespace tree {
 class PtrTree : public Tree {
   public:
     PtrTree(value_t value);
-    ~PtrTree() = default;
+    ~PtrTree();
     PtrTree(value_t newroot, const PtrTree& left, const PtrTree& right);
 
     virtual unsigned size() const override;
@@ -32,8 +31,8 @@ class PtrTree : public Tree {
 
   private:
     const value_t value_;
-    std::shared_ptr<PtrTree> left_;
-    std::shared_ptr<PtrTree> right_;
+    PtrTree* left_;
+    PtrTree* right_;
 };
 
 
