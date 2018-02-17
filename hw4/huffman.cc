@@ -1,4 +1,3 @@
-
 /*
  * huffman.cc: implementaion of the api in huffman.hh
  * Written by Alex Grant
@@ -24,7 +23,6 @@ struct Huffman::Impl {
     std::shared_ptr<tree::PtrTree> hTree; // our huffman tree
     // the values in this map will be the frequencies and keys are characters
     std::unordered_map<symbol_t, int> freqMap;
-    void addFreq(symbol_t sym);
     Impl() noexcept;
     class treeComp;
 };
@@ -34,7 +32,6 @@ Huffman::Impl::Impl() noexcept {
     for (unsigned i = 0; i < NUM_CHARS; i++){
         freqMap.insert({static_cast<symbol_t>(i), 0}); 
     }
-    
     // this loop will build up each "row" of the tree
     // the first row will be the inidivdual characters, next row will be
     // groups of two characters, then four and so on
@@ -81,15 +78,26 @@ public:
     }
 };
 
+
+///////////////////////////////////////////////////////////////////////////////
+Huffman::Huffman() noexcept 
+: pImpl_(new Impl) 
+{
+    incFreq(EOF_NUM);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+Huffman::~Huffman() noexcept {}
+
 ///////////////////////////////////////////////////////////////////////////////
 void
-Huffman::Impl::addFreq(symbol_t sym){
-    freqMap[sym]++; 
+Huffman::incFreq(symbol_t sym){
+    pImpl_->freqMap[sym]++; 
     //build priority queue
     std::priority_queue<std::shared_ptr<tree::PtrTree>, 
                         std::vector<std::shared_ptr<tree::PtrTree>>, 
-                        treeComp> treeQ;
-    for (std::pair<symbol_t, int> el: freqMap) {
+                        Impl::treeComp> treeQ;
+    for (std::pair<symbol_t, int> el: pImpl_->freqMap) {
         treeQ.push(std::make_shared<tree::PtrTree>
             (std::make_pair(static_cast<unsigned>(el.first), el.second))
         );
@@ -111,31 +119,39 @@ Huffman::Impl::addFreq(symbol_t sym){
             *tree1, *tree2);
         treeQ.push(tree3);
     }
-    hTree = treeQ.top(); 
+    pImpl_->hTree = treeQ.top(); 
 }
-
-///////////////////////////////////////////////////////////////////////////////
-Huffman::Huffman() noexcept 
-: pImpl_(new Impl) 
-{}
-
-///////////////////////////////////////////////////////////////////////////////
-Huffman::~Huffman() noexcept {}
 
 ///////////////////////////////////////////////////////////////////////////////
 Huffman::encoding_t 
 Huffman::encode(symbol_t symbol) const {
-
+    auto freq = pImpl_->freqMap[symbol];
+    std::string pathLR = pImpl_->hTree->pathTo(std::make_pair(symbol, freq));
+    // convert lrs to bits
+    encoding_t myEnc;
+    myEnc.resize(pathLR.size());
+    std::transform(pathLR.begin(), pathLR.end(), myEnc.begin(),
+        [](char d){
+            if(d == 'L'){
+                return ZERO;
+            } else if (d=='R'){
+                return ONE;
+            }else{
+                throw std::runtime_error("Invalid path character");
+            }
+        });
+    return myEnc;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 Huffman::symbol_t 
 Huffman::decode(enc_iter_t& begin, const enc_iter_t& end) const noexcept(false) {
-
+    end - begin;
+    return 0;
 }
 
 Huffman::encoding_t 
 Huffman::eofCode() const{
-
+    return encode(EOF_NUM);
 }
 }// end namespace
