@@ -12,19 +12,21 @@ using TreeType = tree::PtrTree;  // Change this to test other subclasses of Tree
 
 TEST_CASE("size is computed correctly", "[ptrtree]") {
     const auto tree1 = new TreeType(15);
-    const auto tree2 = new TreeType(10);
-    const auto tree3 = new TreeType(7, *tree1, *tree2);
 
     SECTION("leaf case") {
         REQUIRE(tree1->size() == 1);
     }
 
     SECTION("compound tree") {
+        const auto tree2 = new TreeType(10);
+        const auto tree3 = new TreeType(7, *tree1, *tree2);
         REQUIRE(tree2->size() == 1);
         REQUIRE(tree3->size() == 3);
 
+        delete tree3;
+        delete tree2;
     }
-    delete tree3;
+    delete tree1;
 }
 
 
@@ -39,6 +41,8 @@ TEST_CASE("Path is computed correctly", "[ptrtree]") {
     REQUIRE(tree3->pathTo(7) == "");
 
     delete tree3;
+    delete tree2;
+    delete tree1;
 }
 
 TEST_CASE("Correct Node is found for given Path", "[ptrtree]") {
@@ -67,6 +71,8 @@ TEST_CASE("Correct Node is found for given Path", "[ptrtree]") {
     }
 
     delete tree3;
+    delete tree2;
+    delete tree1;
 }
 
 TEST_CASE("getByPath works for more complex paths", "[ptrtree]") {
@@ -87,6 +93,12 @@ TEST_CASE("getByPath works for more complex paths", "[ptrtree]") {
     REQUIRE(tree7->getByPath("")   == 7);
 
     delete tree7;
+    delete tree6;
+    delete tree5;
+    delete tree4;
+    delete tree3;
+    delete tree2;
+    delete tree1;
 }
 
 
@@ -114,4 +126,6 @@ TEST_CASE("unbalanced trees work", "[ptrtree]") {
         REQUIRE(tree2->getByPath("R") == 2);
     }
     delete tree3;
+    delete tree2;
+    delete tree1;
 }

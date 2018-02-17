@@ -17,7 +17,7 @@ namespace tree {
 class PtrTree : public Tree {
   public:
     PtrTree(value_t value);
-    ~PtrTree();
+    ~PtrTree() = default;
     PtrTree(value_t newroot, const PtrTree& left, const PtrTree& right);
 
     virtual unsigned size() const override;
