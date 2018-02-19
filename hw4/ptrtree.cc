@@ -20,6 +20,13 @@ PtrTree::PtrTree(value_t value, const PtrTree& left, const PtrTree& right)
 { }
 
 ///////////////////////////////////////////////////////////////////////////////
+// destroy the two leaves
+PtrTree::~PtrTree() {
+    delete left_;
+    delete right_;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Sets left_ to the given tree
 void
 PtrTree::setLeft(const PtrTree& left) {
