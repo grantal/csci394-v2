@@ -14,8 +14,8 @@ namespace tree {
 class Tree {
   public:
     // char then frequency
-    //using value_t = std::pair<unsigned, int>;
-    using value_t = unsigned;
+    using value_t = std::pair<unsigned, int>;
+    //using value_t = unsigned;
 
     Tree() = default; // Base class doesn't initialize anything.
     virtual ~Tree() = default;  // Destructor must always be virtual in base class.

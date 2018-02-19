@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <queue>
+#include <iostream>
 
 // max number of characters in the encoding we're using
 const unsigned NUM_CHARS = 256;
@@ -74,7 +75,21 @@ class Huffman::Impl::treeComp
 public:
     bool operator() 
     (const std::shared_ptr<tree::PtrTree> lhs, const std::shared_ptr<tree::PtrTree> rhs) const{
-        return std::get<1>((*lhs).getByPath("")) < std::get<1>((*rhs).getByPath(""));
+        auto lhsval = (*lhs).getByPath("");
+        auto rhsval = (*rhs).getByPath("");
+         
+        // also prioritizes nodes that represent actual characters
+        // because this will help keep our tree shorter if values without
+        // parents get parents first
+        if(lhsval.second == rhsval.second) {
+            // we want to return true if rhs is a real character and lhs
+            // is not. We want to return false if lhs is a real character
+            // and rhs is not. We don't care if they are both of the same
+            // kind
+            return rhsval.first < NUM_CHARS;
+        }
+
+        return lhsval.second > rhsval.second;
     }
 };
 
@@ -98,6 +113,7 @@ Huffman::incFreq(symbol_t sym){
                         std::vector<std::shared_ptr<tree::PtrTree>>, 
                         Impl::treeComp> treeQ;
     for (std::pair<symbol_t, int> el: pImpl_->freqMap) {
+        //std::cout << static_cast<int>(el.first) << ", " <<el.second << std::endl;
         treeQ.push(std::make_shared<tree::PtrTree>
             (std::make_pair(static_cast<unsigned>(el.first), el.second))
         );
@@ -106,6 +122,8 @@ Huffman::incFreq(symbol_t sym){
     // we combine the two least frequent elements in the queue under one parent,
     // then we put that parent back on the queue
     while (treeQ.size() > 1) {
+        std::cout << treeQ.size() << ", ";
+        std::cout << treeQ.top()->getByPath("").first << std::endl;
         auto tree1 = treeQ.top();
         treeQ.pop();
         auto tree2 = treeQ.top();
@@ -116,7 +134,7 @@ Huffman::incFreq(symbol_t sym){
                 NUM_CHARS + 1, 
                 (*tree1).getByPath("").second + (*tree2).getByPath("").second
              ),
-            *tree1, *tree2);
+            *tree2, *tree1);
         treeQ.push(tree3);
     }
     pImpl_->hTree = treeQ.top(); 
