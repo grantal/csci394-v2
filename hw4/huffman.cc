@@ -33,39 +33,6 @@ Huffman::Impl::Impl() noexcept {
     for (unsigned i = 0; i < NUM_CHARS; i++){
         freqMap.insert({static_cast<symbol_t>(i), 0}); 
     }
-    // this loop will build up each "row" of the tree
-    // the first row will be the inidivdual characters, next row will be
-    // groups of two characters, then four and so on
-    /*
-    std::shared_ptr<std::vector<std::shared_ptr<tree::PtrTree>>> lastRow;
-    for (int rowLength = NUM_CHARS; rowLength > 0; rowLength /= 2){
-        auto currRow = std::make_shared<std::vector<std::shared_ptr<tree::PtrTree>>>(rowLength);
-        for (int i = 0; i < rowLength; i++){
-            // if we're on the first loop, we don't attach any trees
-            if (lastRow){
-                // the children of this row are gonna be every pair of the
-                // last row
-                auto left = (*lastRow)[i*2];
-                auto right = (*lastRow)[i*2 + 1];
-                // all nodes except bottom row will have the same character,
-                // which will not be a valid character
-                auto myTree = std::make_shared<tree::PtrTree>
-                    (std::make_tuple(0, NUM_CHARS + 1), *left, *right);
-                (*currRow).push_back(myTree); 
-            } else {
-                // want to set this node to the ith character in our 'alphabet'
-                auto myId = static_cast<Huffman::symbol_t>(i);
-                auto myTree = std::make_shared<tree::PtrTree>
-                    (std::make_tuple(0, myId));
-                (*currRow).push_back(myTree); 
-            }
-        }
-        lastRow = currRow;
-    }
-    // at the end of our loop, lastrow should just contain one item:
-    // the root of our tree
-    hTree = (*lastRow)[0];
-    */
 }
 
 // will be used by priority queue to compare the frequencies of the characters
@@ -113,7 +80,6 @@ Huffman::incFreq(symbol_t sym){
                         std::vector<tree::PtrTree*>, 
                         Impl::treeComp> treeQ;
     for (std::pair<symbol_t, int> el: pImpl_->freqMap) {
-        //std::cout << static_cast<int>(el.first) << ", " <<el.second << std::endl;
         treeQ.push(new tree::PtrTree
             (std::make_pair(static_cast<unsigned>(el.first), el.second))
         );
@@ -122,8 +88,6 @@ Huffman::incFreq(symbol_t sym){
     // we combine the two least frequent elements in the queue under one parent,
     // then we put that parent back on the queue
     while (treeQ.size() > 1) {
-        std::cout << treeQ.size() << ", ";
-        std::cout << treeQ.top()->getByPath("").first << std::endl;
         auto tree1 = treeQ.top();
         treeQ.pop();
         auto tree2 = treeQ.top();

@@ -37,7 +37,7 @@ TEST_CASE("Most frequent symbol always encodes to single bit", "[compression]") 
   huff.incFreq(1);
   huff.incFreq(1);
   huff.incFreq(1);
-  REQUIRE(huff.encode(0).size() > 1);
   REQUIRE(huff.encode(1).size() == 1);
+  REQUIRE(huff.encode(0).size() > 1);
 }
 
