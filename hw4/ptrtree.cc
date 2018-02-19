@@ -22,8 +22,12 @@ PtrTree::PtrTree(value_t value, const PtrTree& left, const PtrTree& right)
 ///////////////////////////////////////////////////////////////////////////////
 // destroy the two leaves
 PtrTree::~PtrTree() {
-    delete left_;
-    delete right_;
+    if (left_ != nullptr) {
+        delete left_;
+    }
+    if (right_ != nullptr) {
+        delete right_;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

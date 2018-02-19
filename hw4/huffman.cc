@@ -13,8 +13,7 @@
 
 // max number of characters in the encoding we're using
 const unsigned NUM_CHARS = 256;
-const unsigned EOF_NUM = 0;
-
+const unsigned EOF_NUM = 256;
 
 namespace huffman {
 
@@ -23,9 +22,11 @@ namespace huffman {
 struct Huffman::Impl {
     tree::PtrTree* hTree; // our huffman tree
     // the values in this map will be the frequencies and keys are characters
-    std::unordered_map<symbol_t, int> freqMap;
+    std::unordered_map<unsigned, int> freqMap;
     Impl() noexcept;
     class treeComp;
+    void incFreqHelper(unsigned sym);
+    Huffman::encoding_t encodeHelper(unsigned sym) const;
 };
 
 Huffman::Impl::Impl() noexcept {
@@ -33,6 +34,7 @@ Huffman::Impl::Impl() noexcept {
     for (unsigned i = 0; i < NUM_CHARS; i++){
         freqMap.insert({static_cast<symbol_t>(i), 0}); 
     }
+    hTree = new tree::PtrTree(std::make_pair(EOF_NUM, 0));
 }
 
 // will be used by priority queue to compare the frequencies of the characters
@@ -60,29 +62,18 @@ public:
     }
 };
 
-
-///////////////////////////////////////////////////////////////////////////////
-Huffman::Huffman() noexcept 
-: pImpl_(new Impl) 
-{
-    incFreq(EOF_NUM);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-Huffman::~Huffman() noexcept {}
-
-///////////////////////////////////////////////////////////////////////////////
+// The huffman incFreq acts as a wrapper to this class that only takes
+// symbols. This one takes unsigned so i can incremement the eof character
 void
-Huffman::incFreq(symbol_t sym){
-    pImpl_->freqMap[sym]++; 
+Huffman::Impl::incFreqHelper(unsigned sym) {
+    delete hTree;
+    freqMap[sym]++; 
     //build priority queue
     std::priority_queue<tree::PtrTree*, 
                         std::vector<tree::PtrTree*>, 
                         Impl::treeComp> treeQ;
-    for (std::pair<symbol_t, int> el: pImpl_->freqMap) {
-        treeQ.push(new tree::PtrTree
-            (std::make_pair(static_cast<unsigned>(el.first), el.second))
-        );
+    for (std::pair<unsigned, int> el: freqMap) {
+        treeQ.push(new tree::PtrTree(el));
     }
     // now we build the tree
     // we combine the two least frequent elements in the queue under one parent,
@@ -101,14 +92,16 @@ Huffman::incFreq(symbol_t sym){
             *tree2, *tree1);
         treeQ.push(tree3);
     }
-    pImpl_->hTree = treeQ.top(); 
+    hTree = treeQ.top(); 
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
+// another helper
 Huffman::encoding_t 
-Huffman::encode(symbol_t symbol) const {
-    auto freq = pImpl_->freqMap[symbol];
-    std::string pathLR = pImpl_->hTree->pathTo(std::make_pair(symbol, freq));
+Huffman::Impl::encodeHelper(unsigned sym) const {
+    auto freq = freqMap.at(sym);
+    std::string pathLR = hTree->pathTo(std::make_pair(sym, freq));
     // convert lrs to bits
     encoding_t myEnc;
     myEnc.resize(pathLR.size());
@@ -126,6 +119,28 @@ Huffman::encode(symbol_t symbol) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+Huffman::Huffman() noexcept 
+: pImpl_(new Impl) 
+{
+    pImpl_->incFreqHelper(EOF_NUM);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+Huffman::~Huffman() noexcept {}
+
+///////////////////////////////////////////////////////////////////////////////
+void
+Huffman::incFreq(symbol_t sym){
+    pImpl_->incFreqHelper(static_cast<unsigned>(sym));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+Huffman::encoding_t 
+Huffman::encode(symbol_t sym) const {
+    return pImpl_->encodeHelper(static_cast<unsigned>(sym));
+}
+
+///////////////////////////////////////////////////////////////////////////////
 Huffman::symbol_t 
 Huffman::decode(enc_iter_t& begin, const enc_iter_t& end) const noexcept(false) {
     end - begin;
@@ -134,6 +149,6 @@ Huffman::decode(enc_iter_t& begin, const enc_iter_t& end) const noexcept(false) 
 
 Huffman::encoding_t 
 Huffman::eofCode() const{
-    return encode(EOF_NUM);
+    return pImpl_->encodeHelper(EOF_NUM);
 }
 }// end namespace
