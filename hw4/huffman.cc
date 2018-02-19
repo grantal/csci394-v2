@@ -21,7 +21,7 @@ namespace huffman {
 ///////////////////////////////////////////////////////////////////////////////
 // This will hold all of the data for our implementation
 struct Huffman::Impl {
-    std::shared_ptr<tree::PtrTree> hTree; // our huffman tree
+    tree::PtrTree* hTree; // our huffman tree
     // the values in this map will be the frequencies and keys are characters
     std::unordered_map<symbol_t, int> freqMap;
     Impl() noexcept;
@@ -74,7 +74,7 @@ class Huffman::Impl::treeComp
 {
 public:
     bool operator() 
-    (const std::shared_ptr<tree::PtrTree> lhs, const std::shared_ptr<tree::PtrTree> rhs) const{
+    (const tree::PtrTree* lhs, const tree::PtrTree* rhs) const{
         auto lhsval = (*lhs).getByPath("");
         auto rhsval = (*rhs).getByPath("");
          
@@ -109,12 +109,12 @@ void
 Huffman::incFreq(symbol_t sym){
     pImpl_->freqMap[sym]++; 
     //build priority queue
-    std::priority_queue<std::shared_ptr<tree::PtrTree>, 
-                        std::vector<std::shared_ptr<tree::PtrTree>>, 
+    std::priority_queue<tree::PtrTree*, 
+                        std::vector<tree::PtrTree*>, 
                         Impl::treeComp> treeQ;
     for (std::pair<symbol_t, int> el: pImpl_->freqMap) {
         //std::cout << static_cast<int>(el.first) << ", " <<el.second << std::endl;
-        treeQ.push(std::make_shared<tree::PtrTree>
+        treeQ.push(new tree::PtrTree
             (std::make_pair(static_cast<unsigned>(el.first), el.second))
         );
     }
@@ -129,7 +129,7 @@ Huffman::incFreq(symbol_t sym){
         auto tree2 = treeQ.top();
         treeQ.pop();
         // freq(tree3) = freq(tree1) + freq(tree2)
-        auto tree3 = std::make_shared<tree::PtrTree>
+        auto tree3 = new tree::PtrTree
             (std::make_pair(
                 NUM_CHARS + 1, 
                 (*tree1).getByPath("").second + (*tree2).getByPath("").second
