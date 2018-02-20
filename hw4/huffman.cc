@@ -143,8 +143,29 @@ Huffman::encode(symbol_t sym) const {
 ///////////////////////////////////////////////////////////////////////////////
 Huffman::symbol_t 
 Huffman::decode(enc_iter_t& begin, const enc_iter_t& end) const noexcept(false) {
-    end - begin;
-    return 0;
+    // Convert 0s and 1s to Ls and Rs
+    std::string pathLR;
+    pathLR.resize(end-begin);
+    std::transform(begin, end, pathLR.begin(),
+        [](bit_t d){
+            if(d == ZERO){
+                return 'L';
+            } else if (d == ONE){
+                return 'R';
+            }else{
+                throw std::runtime_error("Invalid encoding bit");
+            }
+        });
+    // want to stop decoding if we see an EOF
+    auto mySymbol = pImpl_->hTree->getByPath(pathLR).first;
+    if (mySymbol == EOF_NUM) {
+        begin = end;
+        return 0;
+    } 
+    // move begin up past symbol
+    auto enc = pImpl_->encodeHelper(mySymbol);
+    begin += enc.size();
+    return static_cast<symbol_t>(mySymbol);
 }
 
 Huffman::encoding_t 
