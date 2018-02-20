@@ -24,6 +24,7 @@ struct Huffman::Impl {
     // the values in this map will be the frequencies and keys are characters
     std::unordered_map<unsigned, int> freqMap;
     Impl() noexcept;
+    ~Impl() noexcept;
     class treeComp;
     void incFreqHelper(unsigned sym);
     Huffman::encoding_t encodeHelper(unsigned sym) const;
@@ -35,6 +36,10 @@ Huffman::Impl::Impl() noexcept {
         freqMap.insert({static_cast<symbol_t>(i), 0}); 
     }
     hTree = new tree::PtrTree(std::make_pair(EOF_NUM, 0));
+}
+
+Huffman::Impl::~Impl() noexcept {
+    delete hTree;
 }
 
 // will be used by priority queue to compare the frequencies of the characters
@@ -64,6 +69,7 @@ public:
 
 // The huffman incFreq acts as a wrapper to this class that only takes
 // symbols. This one takes unsigned so i can incremement the eof character
+// it uses a priority queue to build up the tree with the least frequent elements on the bottom
 void
 Huffman::Impl::incFreqHelper(unsigned sym) {
     delete hTree;
@@ -98,6 +104,8 @@ Huffman::Impl::incFreqHelper(unsigned sym) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // another helper
+// we just use ptrtree's pathTo method to get the path down the tree to
+// the symbol we want
 Huffman::encoding_t 
 Huffman::Impl::encodeHelper(unsigned sym) const {
     auto freq = freqMap.at(sym);
@@ -141,6 +149,8 @@ Huffman::encode(symbol_t sym) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// similar to encode, we use ptrtree's getByPath to find the symbol at the 
+// path we were given. We then move begin up however long the encoding was.
 Huffman::symbol_t 
 Huffman::decode(enc_iter_t& begin, const enc_iter_t& end) const noexcept(false) {
     // Convert 0s and 1s to Ls and Rs
