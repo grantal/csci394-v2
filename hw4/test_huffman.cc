@@ -41,3 +41,23 @@ TEST_CASE("Most frequent symbol always encodes to single bit", "[compression]") 
   REQUIRE(huff.encode(0).size() > 1);
 }
 
+TEST_CASE("Decompress returns the same symbol", "[decompression]") {
+    auto huff = Huffman();
+    Huffman::symbol_t sym = 0;
+    auto code = huff.encode(sym);
+    auto b = code.cbegin();
+    auto e = code.cend();
+    const auto decSym = huff.decode(b, e);
+    REQUIRE(sym == decSym);
+}
+
+TEST_CASE("EOF code will end decompression", "[decompression]") {
+    auto huff = Huffman();
+    auto eof_code = huff.eofCode();
+    auto b = eof_code.cbegin();
+    auto e = eof_code.cend();
+    const auto symbol = huff.decode(b, e);
+    // these are what decompress checks for to stop decoding
+    REQUIRE(!symbol);
+    REQUIRE(b==e);
+}
